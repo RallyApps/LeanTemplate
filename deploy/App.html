@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Template</title>
+    <title>Kanban Template</title>
 
     <script type="text/javascript" src="/apps/2.0p2/sdk.js"></script>
 
@@ -61,7 +61,6 @@
             
                 ioCallback:function() {
                     this.outstandingQueries--;
-                    console.log(this.outstandingQueries);
                     if (!this.outstandingQueries) {
                         this.fireEvent("statesUpdated");
                     }
@@ -96,9 +95,23 @@
                 componentCls: 'app',
             
                 launch: function() {
-                    this.setup = Ext.create("SetupState", {});
-                    this.setup.on("statesUpdated", this._setupComplete, this);
-                    this.setup.getStates();
+            
+                    Ext.Msg.show({
+                        title:'Configure Workspace',
+                        msg: 'Clicking OK will reconfigure your workspace. Do you wish to continue?',
+                        buttons: Ext.Msg.YESNO,
+                        icon: Ext.Msg.QUESTION,
+                        fn:this._setupStates,
+                        scope:this
+                    });
+            
+                },
+                _setupStates:function(btn) {
+                    if (btn === 'yes') {
+                        this.setup = Ext.create("SetupState", {});
+                        this.setup.on("statesUpdated", this._setupComplete, this);
+                        this.setup.getStates();
+                    }
                 },
                 _createColumns:function (states) {
                     var columns;
@@ -128,19 +141,14 @@
                         attribute:'State',
                         columns:columns,
                         enableRanking:this.getContext().get('workspace').WorkspaceConfiguration.DragDropRankingEnabled,
-                        columnConfig:{
-                            xtype:'rallykanbancolumn'
-                        },
                         storeConfig:{
                             filters:[
                                 {
                                     property:'PortfolioItemType',
-                                    value:this.currentType
+                                    value:this.setup.type._ref
                                 }
                             ]
-                        },
-            
-                        loadDescription:'Portfolio Kanban'
+                        }
                     });
             
                     this.add(cardboard);
@@ -148,7 +156,7 @@
             });
 
             Rally.launchApp('CustomApp', {
-                name: 'Template'
+                name: 'Kanban Template'
             });
         });
     </script>
